@@ -16,22 +16,22 @@ use Psr\Log\NullLogger;
 class ClientPacketHandler extends AbstractPacketHandler
 {
     /** @var Client */
-    private Client $client;
+    protected Client $client;
 
     /** @var LoggerInterface */
-    private LoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     /** @var SymmetricKey|null */
-    private ?SymmetricKey $cryptor;
+    protected ?SymmetricKey $cryptor;
 
     /** @var JsonSerializer */
-    private JsonSerializer $jsonSerializer;
+    protected JsonSerializer $jsonSerializer;
 
     /** @var bool */
-    private bool $isEncrypted;
+    protected bool $isEncrypted;
 
     /** @var Deferred */
-    private Deferred $closedDefer;
+    protected Deferred $closedDefer;
 
     //
 

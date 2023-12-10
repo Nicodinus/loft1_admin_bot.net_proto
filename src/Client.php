@@ -7,13 +7,13 @@ use Amp\Socket\SocketAddress;
 class Client implements ClientInterface
 {
     /** @var string */
-    private string $id;
+    protected string $id;
 
     /** @var SocketAddress */
-    private SocketAddress $remoteAddress;
+    protected SocketAddress $remoteAddress;
 
     /** @var ClientHandler */
-    private ClientHandler $handler;
+    protected ClientHandler $handler;
 
     //
 

@@ -17,28 +17,28 @@ use function Amp\call;
 class ClientHandler implements ClientHandlerInterface
 {
     /** @var class-string<PacketInterface>[] */
-    private static array $packetsRegistry;
+    protected static array $packetsRegistry;
 
     /** @var Client */
-    private Client $client;
+    protected Client $client;
 
     /** @var LoggerInterface */
-    private LoggerInterface $logger;
+    protected LoggerInterface $logger;
 
     /** @var Mutex */
-    private Mutex $mutex;
+    protected Mutex $mutex;
 
     /** @var SymmetricKey|null */
-    private ?SymmetricKey $cryptor;
+    protected ?SymmetricKey $cryptor;
 
     /** @var ClientPacketHandler|null */
-    private ?ClientPacketHandler $packetHandler;
+    protected ?ClientPacketHandler $packetHandler;
 
     /** @var bool */
-    private bool $isShutdown;
+    protected bool $isShutdown;
 
     /** @var bool */
-    private bool $isAuthorized;
+    protected bool $isAuthorized;
 
     //
 
@@ -129,7 +129,7 @@ class ClientHandler implements ClientHandlerInterface
             }
 
             if ($this->isShutdown) {
-                return;
+                throw new ClosedException("Shutdown pending");
             }
 
             $lock = yield $this->mutex->acquire();
