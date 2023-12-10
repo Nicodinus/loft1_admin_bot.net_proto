@@ -1,0 +1,45 @@
+{
+  "name": "nicodinus/loft1_admin_bot.net_proto",
+  "license": "MIT",
+  "type": "project",
+  "authors": [
+	{
+	  "name": "Aleksei Iarovoi",
+	  "email": "nicodinus@yandex.ru"
+	}
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "%userprofile%\\Documents\\socket_packet_handler",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
+      "type": "path",
+      "url": "%userprofile%\\Documents\\storage_service",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+	"php": ">=7.4",
+    "amphp/amp": "^2.6",
+    "phpseclib/phpseclib": "~3.0",
+    "nicodinus/amphp-socket_packet_handler": "dev-master",
+    "nicodinus/amphp-storage_service": "dev-master",
+    "haydenpierce/class-finder": "^0.5.3"
+  },
+  "require-dev": {
+    "larapack/dd": "^1"
+  },
+  "autoload": {
+    "psr-4": {
+      "Nicodinus\\Loft1AdminBot\\NetProto\\": "src"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
