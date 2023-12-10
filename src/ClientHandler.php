@@ -118,30 +118,17 @@ class ClientHandler implements ClientHandlerInterface
     }
 
     /**
-     * @inheritDoc
+     * @param Socket\Socket $socket
+     *
+     * @return Promise<void>
      */
-    public function establishConnection(): Promise
+    protected function _handleSocket(Socket\Socket $socket): Promise
     {
-        return call(function () {
-
-            if ($this->isAvailable()) {
-                return;
-            }
-
-            if ($this->isShutdown) {
-                throw new ClosedException("Shutdown pending");
-            }
-
-            $lock = yield $this->mutex->acquire();
-            if ($this->isAvailable()) {
-                $lock->release();
-                return;
-            }
+        return call(function () use (&$socket) {
 
             try {
 
-                $this->logger->debug("Trying connect with {$this->client->getRemoteAddress()}");
-                $socket = yield Socket\connect($this->client->getRemoteAddress());
+                $this->logger->debug("Initialize packet handler on {$this->client->getRemoteAddress()}");
 
                 $this->packetHandler = (new ClientPacketHandler(
                     $socket,
@@ -154,15 +141,16 @@ class ClientHandler implements ClientHandlerInterface
                     $this->packetHandler->registerPacket($packetClassname);
                 }
 
+                $this->logger->debug("Initialize handshake with {$this->client->getRemoteAddress()}");
+
                 //TODO: handshake
 
-                $this->logger->debug("Connection successfully established with {$this->client->getRemoteAddress()}");
+                //$this->logger->debug("Connection successfully established with {$this->client->getRemoteAddress()}");
 
             } catch (\Throwable $exception) {
                 $this->packetHandler = null;
-                $this->logger->debug("Can't establish connection with {$this->client->getRemoteAddress()}");
-            } finally {
-                $lock->release();
+                //$this->logger->debug("Can't establish connection with {$this->client->getRemoteAddress()}");
+                throw $exception;
             }
 
         });
@@ -174,10 +162,6 @@ class ClientHandler implements ClientHandlerInterface
     protected function _checkConnection(): Promise
     {
         return call(function () {
-
-            if (!$this->isAvailable()) {
-                yield $this->establishConnection();
-            }
 
             if (!$this->isAvailable()) {
                 throw new ClosedException("Can't establish connection with {$this->client->getRemoteAddress()}");

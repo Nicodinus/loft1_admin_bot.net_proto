@@ -28,11 +28,6 @@ interface ClientHandlerInterface
     public function isAvailable(): bool;
 
     /**
-     * @return Promise<void>
-     */
-    public function establishConnection(): Promise;
-
-    /**
      * @return Promise<int|false>
      */
     public function ping(): Promise;
