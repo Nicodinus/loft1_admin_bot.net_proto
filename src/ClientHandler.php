@@ -80,6 +80,8 @@ class ClientHandler implements ClientHandlerInterface
                         continue;
                     }
 
+                    $this->logger->debug("Found packet {$class}");
+
                 } catch (\Throwable $exception) {
                     $this->logger->error("Packets finder exception", ['exception' => $exception]);
                     continue;
@@ -89,6 +91,7 @@ class ClientHandler implements ClientHandlerInterface
 
             }
 
+            $this->logger->debug("Found " . \sizeof(self::$packetsRegistry) . " packet(s)");
 
         }
     }
