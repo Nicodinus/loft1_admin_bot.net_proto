@@ -18,12 +18,12 @@ class Client implements ClientInterface
     //
 
     /**
-     * @param string $id
      * @param SocketAddress $remoteAddress
+     * @param string|null $id
      */
-    public function __construct(string $id, SocketAddress $remoteAddress)
+    public function __construct(SocketAddress $remoteAddress, ?string $id = null)
     {
-        $this->id = $id;
+        $this->id = $id ?? $remoteAddress->toString();
         $this->remoteAddress = $remoteAddress;
     }
 
