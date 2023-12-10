@@ -53,6 +53,11 @@ interface ClientHandlerInterface
     public function shutdown(): Promise;
 
     /**
+     * @return Promise<void>
+     */
+    public function getClosedPromise(): Promise;
+
+    /**
      * @param bool $isEnabled
      * @param SymmetricKey|null $cryptor
      *

@@ -2,6 +2,7 @@
 
 namespace Nicodinus\Loft1AdminBot\NetProto;
 
+use Amp\Deferred;
 use Amp\Promise;
 use Amp\Serialization\JsonSerializer;
 use Amp\Socket;
@@ -29,6 +30,9 @@ class ClientPacketHandler extends AbstractPacketHandler
     /** @var bool */
     private bool $isEncrypted;
 
+    /** @var Deferred */
+    private Deferred $closedDefer;
+
     //
 
     /**
@@ -46,6 +50,15 @@ class ClientPacketHandler extends AbstractPacketHandler
         $this->logger = $logger ?? new NullLogger();
         $this->cryptor = $cryptor;
         $this->jsonSerializer = JsonSerializer::withAssociativeArrays();
+        $this->closedDefer = new Deferred();
+    }
+
+    /**
+     * @return Promise<void>
+     */
+    public function getClosedPromise(): Promise
+    {
+        return $this->closedDefer->promise();
     }
 
     /**
@@ -129,8 +142,11 @@ class ClientPacketHandler extends AbstractPacketHandler
     protected function _handleException(\Throwable $throwable): void
     {
         $this->logger->error("An unhandled exception", ['exception' => $throwable]);
+        if (!$this->closedDefer->isResolved()) {
+            $this->closedDefer->fail($throwable);
+        }
 
-        Promise\rethrow($this->client->getHandler()->close());
+        $this->close();
     }
 
     /**
@@ -151,6 +167,10 @@ class ClientPacketHandler extends AbstractPacketHandler
     protected function _onClosed(): void
     {
         $this->logger->debug("Connection with {$this->client->getRemoteAddress()} closed");
+
+        if (!$this->closedDefer->isResolved()) {
+            $this->closedDefer->resolve();
+        }
 
         Promise\rethrow($this->client->getHandler()->close());
     }

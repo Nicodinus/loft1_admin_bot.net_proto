@@ -209,6 +209,14 @@ class ClientHandler implements ClientHandlerInterface
     }
 
     /**
+     * @return Promise<void>
+     */
+    public function getClosedPromise(): Promise
+    {
+        return $this->packetHandler->getClosedPromise();
+    }
+
+    /**
      * @inheritDoc
      */
     public function close(): Promise
