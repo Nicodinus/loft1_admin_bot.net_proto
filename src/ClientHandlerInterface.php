@@ -28,7 +28,7 @@ interface ClientHandlerInterface
     public function isAvailable(): bool;
 
     /**
-     * @return Promise<int|false>
+     * @return Promise<int|float|false>
      */
     public function ping(): Promise;
 
@@ -67,10 +67,11 @@ interface ClientHandlerInterface
 
     /**
      * @param string $packetClassname
+     * @param string|null $requestId
      *
      * @return ClientRequestPacketInterface
      */
-    public function createRequestPacket(string $packetClassname): ClientRequestPacketInterface;
+    public function createRequestPacket(string $packetClassname, ?string $requestId = null): ClientRequestPacketInterface;
 
     /**
      * @param ClientRequestPacketInterface $request

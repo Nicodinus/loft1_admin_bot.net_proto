@@ -77,6 +77,8 @@ class ClientPacketHandler extends AbstractPacketHandler
             throw new \InvalidArgumentException("Can't enable encryption because cryptor is not presented!");
         }
 
+        $this->logger->debug("Toggle encryption", ['enabled' => $isEnabled]);
+
         $this->isEncrypted = $isEnabled;
         return $this;
     }
@@ -92,9 +94,14 @@ class ClientPacketHandler extends AbstractPacketHandler
     /**
      * @inheritDoc
      */
-    protected function _handlePacket(PacketInterface $packet)
+    protected function _handlePacket(PacketInterface $packet, ?string $requestId = null)
     {
-        $this->logger->debug("HANDLE packet {$packet::getId()}");
+        $data = [];
+        if ($requestId) {
+            $data['request_id'] = $requestId;
+        }
+
+        $this->logger->debug("HANDLE packet {$packet::getId()}", $data);
     }
 
     /**
@@ -111,6 +118,11 @@ class ClientPacketHandler extends AbstractPacketHandler
             return null;
         }
 
+        $this->logger->debug("UNSERIALIZE packet {$data['id']}", [
+            'request_id' => $data['request_id'] ?? null,
+            'data' => $data['data'] ?? null,
+        ]);
+
         return [
             'id' => $data['id'],
             'request_id' => $data['request_id'] ?? null,
@@ -123,17 +135,22 @@ class ClientPacketHandler extends AbstractPacketHandler
      */
     protected function _serializePacket(string $id, ?string $requestId = null, $data = null): string
     {
-        $data = $this->jsonSerializer->serialize([
+        $_data = $this->jsonSerializer->serialize([
             'id' => $id,
             'request_id' => $requestId,
             'data' => $data,
         ]);
 
         if ($this->isEncrypted) {
-            $data = $this->cryptor->encrypt($data);
+            $_data = $this->cryptor->encrypt($_data);
         }
 
-        return $data;
+        $this->logger->debug("SERIALIZE packet {$id}", [
+            'request_id' => $requestId,
+            'data' => $data,
+        ]);
+
+        return $_data;
     }
 
     /**
@@ -155,7 +172,7 @@ class ClientPacketHandler extends AbstractPacketHandler
     protected function _createPacket(string $packetClassname, ?string $requestId = null, $data = null): ?PacketInterface
     {
         if (\is_a($packetClassname, AbstractClientPacket::class, true)) {
-            return new $packetClassname($this->client, $data);
+            return new $packetClassname($this->client, $data, $requestId);
         }
 
         return null;

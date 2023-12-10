@@ -8,11 +8,14 @@ use Amp\Socket;
 use Amp\Sync\LocalMutex;
 use Amp\Sync\Mutex;
 use HaydenPierce\ClassFinder\ClassFinder;
+use Nicodinus\Loft1AdminBot\NetProto\Packets\HandshakeStep2Packet;
 use Nicodinus\SocketPacketHandler\PacketInterface;
 use phpseclib3\Crypt\Common\SymmetricKey;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use function Amp\asyncCall;
 use function Amp\call;
+use function Amp\delay;
 
 class ClientHandler implements ClientHandlerInterface
 {
@@ -147,7 +150,21 @@ class ClientHandler implements ClientHandlerInterface
                 $this->logger->debug("Initialize handshake with {$this->client->getRemoteAddress()}");
 
                 //TODO: handshake
+                $response = yield $this->createRequestPacket(Packets\HandshakePacket::class)->sendWaitResponse();
+                if (!($response instanceof HandshakeStep2Packet)) {
+                    throw new \RuntimeException("Invalid handshake response packet!");
+                }
 
+                $this->setEncryption(true);
+
+                $response = yield $this->createRequestPacket(Packets\HandshakePacket::class)->sendWaitResponse();
+                if (!($response instanceof HandshakeStep2Packet)) {
+                    throw new \RuntimeException("Invalid handshake response packet!");
+                }
+
+                $this->isAuthorized = true;
+
+                //dump($response);
                 //$this->logger->debug("Connection successfully established with {$this->client->getRemoteAddress()}");
 
             } catch (\Throwable $exception) {
@@ -182,7 +199,14 @@ class ClientHandler implements ClientHandlerInterface
 
             yield $this->_checkConnection();
 
-            // TODO: Implement ping() method.
+            $response = yield $this->createRequestPacket(Packets\PingPacket::class)->sendWaitResponse();
+
+            $diff = false;
+            if (\sizeof($response->getData()) > 1) {
+                $diff = $response->getData()[1] - $response->getData()[0];
+            }
+
+            return $diff;
 
         });
     }
@@ -260,10 +284,10 @@ class ClientHandler implements ClientHandlerInterface
     /**
      * @inheritDoc
      */
-    public function createRequestPacket(string $packetClassname): Packets\ClientRequestPacketInterface
+    public function createRequestPacket(string $packetClassname, ?string $requestId = null): Packets\ClientRequestPacketInterface
     {
         if (\is_a($packetClassname, Packets\AbstractClientRequestPacket::class, true)) {
-            return new $packetClassname($this->client);
+            return new $packetClassname($this->client, null, $requestId);
         }
 
         throw new \InvalidArgumentException("Unsupported class {$packetClassname}!");
@@ -302,7 +326,7 @@ class ClientHandler implements ClientHandlerInterface
             }
         }
 
-        $this->logger->debug("SEND & WAIT {$responseTimeoutSeconds} {$request::getId()}", $data);
+        $this->logger->debug("SEND & WAIT({$responseTimeoutSeconds}) {$request::getId()}", $data);
 
         return $this->packetHandler->sendPacketWithResponse($request, $responseTimeoutSeconds);
     }

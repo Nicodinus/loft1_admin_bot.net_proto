@@ -18,7 +18,7 @@ class ClosePacket extends AbstractClientRequestPacket implements CanHandlePacket
     /**
      * @inheritDoc
      */
-    public function handle()
+    public function handle(?string $requestId = null)
     {
         if (!$this->client->getHandler()->isAuthorized()) {
             yield $this->client->getHandler()->createRequestPacket(UnauthorizedErrorPacket::class)->send();
