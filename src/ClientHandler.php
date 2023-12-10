@@ -169,9 +169,9 @@ class ClientHandler implements ClientHandlerInterface
     }
 
     /**
-     * @inheritDoc
+     * @return Promise<void>
      */
-    public function ping(): Promise
+    protected function _checkConnection(): Promise
     {
         return call(function () {
 
@@ -182,6 +182,18 @@ class ClientHandler implements ClientHandlerInterface
             if (!$this->isAvailable()) {
                 throw new ClosedException("Can't establish connection with {$this->client->getRemoteAddress()}");
             }
+
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function ping(): Promise
+    {
+        return call(function () {
+
+            yield $this->_checkConnection();
 
             // TODO: Implement ping() method.
 
@@ -195,13 +207,7 @@ class ClientHandler implements ClientHandlerInterface
     {
         return call(function () {
 
-            if (!$this->isAvailable()) {
-                yield $this->establishConnection();
-            }
-
-            if (!$this->isAvailable()) {
-                throw new ClosedException("Can't establish connection with {$this->client->getRemoteAddress()}");
-            }
+            yield $this->_checkConnection();
 
             // TODO: Implement reload() method.
 
