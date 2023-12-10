@@ -19,8 +19,8 @@ class ClientHandler implements ClientHandlerInterface
     /** @var class-string<PacketInterface>[] */
     protected static array $packetsRegistry;
 
-    /** @var Client */
-    protected Client $client;
+    /** @var ClientInterface */
+    protected ClientInterface $client;
 
     /** @var LoggerInterface */
     protected LoggerInterface $logger;
