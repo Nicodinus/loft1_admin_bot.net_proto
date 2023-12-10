@@ -113,6 +113,8 @@ class ClientPacketHandler extends AbstractPacketHandler
             $data = $this->cryptor->decrypt($data);
         }
 
+        //dump($data);
+
         $data = $this->jsonSerializer->unserialize($data);
         if (!$data['id']) {
             return null;
@@ -140,6 +142,8 @@ class ClientPacketHandler extends AbstractPacketHandler
             'request_id' => $requestId,
             'data' => $data,
         ]);
+
+        //dump($_data);
 
         if ($this->isEncrypted) {
             $_data = $this->cryptor->encrypt($_data);

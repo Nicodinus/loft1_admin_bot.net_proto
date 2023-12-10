@@ -38,7 +38,8 @@
   "autoload": {
     "psr-4": {
       "Nicodinus\\Loft1AdminBot\\NetProto\\": "src"
-    }
+    },
+    "files": ["src/functions.php"]
   },
   "minimum-stability": "dev",
   "prefer-stable": true

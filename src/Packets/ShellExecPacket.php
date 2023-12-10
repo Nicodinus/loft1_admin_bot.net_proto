@@ -7,6 +7,7 @@ use Amp\Process\Process;
 use Nicodinus\SocketPacketHandler\CanHandlePacket;
 use function Amp\Promise\timeout;
 use function Amp\Promise\timeoutWithDefault;
+use function Nicodinus\Loft1AdminBot\NetProto\serializeException;
 
 class ShellExecPacket extends AbstractClientRequestPacket implements CanHandlePacket
 {
@@ -46,6 +47,7 @@ class ShellExecPacket extends AbstractClientRequestPacket implements CanHandlePa
             return;
         }
 
+        $process = null;
         try {
 
             $process = new Process($this->data['query']);
@@ -62,18 +64,24 @@ class ShellExecPacket extends AbstractClientRequestPacket implements CanHandlePa
             /** @var ShellExecResponsePacket $packet */
             $packet = $this->client->getHandler()->createRequestPacket(ShellExecResponsePacket::class, $requestId);
             $packet->setResult([
-                'stdout' => yield $stdoutResult,
-                'stderr' => yield $stderrResult,
+                'stdout' => \trim(yield $stdoutResult),
+                'stderr' => \trim(yield $stderrResult),
             ]);
             yield $packet->send();
 
         } catch (\Throwable $exception) {
+
+            if ($process && $process->isRunning()) {
+                $process->kill();
+            }
+
             /** @var ShellExecResponsePacket $packet */
             $packet = $this->client->getHandler()->createRequestPacket(ShellExecResponsePacket::class, $requestId);
             $packet->setResult([
-                'error' => \serialize($exception),
+                'error' => serializeException($exception),
             ]);
             yield $packet->send();
+
         }
 
     }
