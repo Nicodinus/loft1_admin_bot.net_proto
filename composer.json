@@ -10,18 +10,12 @@
   ],
   "repositories": [
     {
-      "type": "path",
-      "url": "%userprofile%\\Documents\\socket_packet_handler",
-      "options": {
-        "symlink": true
-      }
+      "type": "github",
+      "url": "https://github.com/Nicodinus/amphp-socket_packet_handler"
     },
     {
-      "type": "path",
-      "url": "%userprofile%\\Documents\\storage_service",
-      "options": {
-        "symlink": true
-      }
+      "type": "github",
+      "url": "https://github.com/Nicodinus/amphp-storage_service"
     }
   ],
   "require": {
